@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NetPractice Visual Guide</title>
+  <style>
+    :root {
+      --ink:#172033; --muted:#647087; --paper:#f6f3ec; --card:#fffdf8;
+      --blue:#4e72df; --cyan:#4bb8c9; --orange:#ef8e48; --green:#3d9b71;
+      --red:#d95757; --line:#d8d5cd; --shadow:0 14px 40px #24304d18;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;color:var(--ink);background:var(--paper);font-family:Inter,"Noto Sans JP",system-ui,sans-serif;line-height:1.75}
+    header{min-height:78vh;display:grid;place-items:center;padding:64px 24px;background:radial-gradient(circle at 10% 20%,#d8f4f2 0,transparent 28%),radial-gradient(circle at 90% 15%,#e0e6ff 0,transparent 28%),var(--paper)}
+    .hero{width:min(1050px,100%)} .eyebrow{font:700 .8rem/1.2 monospace;letter-spacing:.18em;color:var(--blue)}
+    h1{font-size:clamp(3rem,9vw,7.5rem);line-height:.92;letter-spacing:-.07em;margin:.25em 0 .2em}
+    h1 span{color:var(--blue)} .lead{font-size:clamp(1.05rem,2vw,1.35rem);max-width:720px;color:var(--muted)}
+    .route{margin-top:42px;display:flex;align-items:center;gap:12px;overflow:auto;padding:10px 0}
+    .node{flex:0 0 auto;background:var(--card);border:2px solid var(--ink);border-radius:18px;padding:13px 18px;font-weight:800;box-shadow:4px 4px 0 var(--ink)}
+    .arrow{font-size:1.6rem;color:var(--orange)}
+    nav{position:sticky;top:0;z-index:5;background:#fffdf8e8;backdrop-filter:blur(12px);border-block:1px solid var(--line);overflow:auto;white-space:nowrap;padding:11px;text-align:center}
+    nav a{color:var(--ink);text-decoration:none;font-weight:700;font-size:.86rem;margin:0 12px}
+    main{width:min(1050px,calc(100% - 32px));margin:auto;padding:70px 0 120px}
+    section{margin:0 0 100px;scroll-margin-top:70px} h2{font-size:clamp(2rem,5vw,3.5rem);line-height:1.1;letter-spacing:-.04em;margin:0 0 14px}
+    h3{margin-top:0;font-size:1.3rem}.intro{color:var(--muted);max-width:750px;margin-bottom:30px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:var(--shadow)}
+    .icon{font-size:2.2rem}.tag{display:inline-block;border-radius:99px;padding:3px 10px;font:700 .74rem monospace;background:#e7ebfa;color:var(--blue)}
+    .diagram{background:#182136;color:#eaf0ff;border-radius:24px;padding:28px;overflow:auto;font:600 clamp(.72rem,1.7vw,1rem)/1.7 ui-monospace,monospace;white-space:pre;box-shadow:var(--shadow)}
+    .analogy{border-left:5px solid var(--orange)} .rule{border-left:5px solid var(--green)} .warning{border-left:5px solid var(--red)}
+    table{width:100%;border-collapse:collapse;background:var(--card);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)} th,td{padding:14px;text-align:left;border-bottom:1px solid var(--line)}th{background:#e9edfa}
+    .range{display:grid;grid-template-columns:1fr 8fr 1fr;margin-top:20px}.range>*{padding:15px 8px;text-align:center;font-size:.8rem}.nw{background:#f4c8c8}.hosts{background:#ccebdc}.bc{background:#f4c8c8}
+    label{display:block;font-weight:800;margin-bottom:6px} input{width:100%;font:inherit;padding:13px 15px;border:2px solid var(--line);border-radius:12px;background:white}
+    button{margin-top:14px;border:0;border-radius:12px;background:var(--blue);color:white;font-weight:800;padding:13px 20px;cursor:pointer}button:hover{filter:brightness(.93)}
+    #result{margin-top:18px;min-height:64px}.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.result-grid div{background:#eef1fa;border-radius:12px;padding:10px}.result-grid small{display:block;color:var(--muted)}
+    .steps{counter-reset:step;display:grid;gap:14px}.step{position:relative;padding:22px 22px 22px 72px;background:var(--card);border:1px solid var(--line);border-radius:18px}.step:before{counter-increment:step;content:counter(step);position:absolute;left:20px;top:20px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:var(--blue);color:white;font-weight:900}
+    .quiz button{background:var(--ink);margin-right:8px}.answer{display:none;margin-top:15px;padding:15px;background:#e2f2e9;border-radius:12px}.answer.show{display:block}
+    .check label{font-weight:600;padding:8px 0;display:flex;gap:10px;align-items:flex-start}.check input{width:auto;margin-top:7px;accent-color:var(--green)}
+    footer{text-align:center;color:var(--muted);padding:30px}
+    @media(max-width:720px){.grid,.grid.three{grid-template-columns:1fr}.route{gap:7px}.node{padding:10px 12px}.result-grid{grid-template-columns:1fr}header{min-height:65vh}.range{grid-template-columns:1.5fr 5fr 1.5fr}}
+  </style>
+</head>
+<body>
+<header><div class="hero">
+  <div class="eyebrow">NETPRACTICE / VISUAL GUIDE</div>
+  <h1>ネットワークは<br><span>住所と道案内。</span></h1>
+  <p class="lead">NetPracticeで必要なのは「同じ町を見分ける」「別の町への道を教える」「帰り道も作る」の3つです。</p>
+  <div class="route" aria-label="通信経路"><div class="node">💻 PC</div><div class="arrow">→</div><div class="node">🔀 Switch</div><div class="arrow">→</div><div class="node">📮 Router</div><div class="arrow">→</div><div class="node">💻 PC</div></div>
+</div></header>
+<nav><a href="#map">全体像</a><a href="#subnet">サブネット</a><a href="#devices">機器</a><a href="#router">ルーター</a><a href="#routes">経路表</a><a href="#levels">Level 4・5</a><a href="#solve">解き方</a><a href="#tool">計算機</a></nav>
+<main>
+<section id="map"><span class="tag">01 / MENTAL MODEL</span><h2>まずは4人の登場人物</h2><p class="intro">難しい名前を、町の配達に置き換えて覚えましょう。</p>
+  <div class="grid three">
+    <article class="card"><div class="icon">🏠</div><h3>IPアドレス</h3><p>一台ごとの住所。例：<code>192.168.1.42</code>。同じネットワーク内で重複できません。</p></article>
+    <article class="card"><div class="icon">🏘️</div><h3>サブネットマスク</h3><p>住所のどこまでが町名かを決めます。<code>/24</code>なら最初の24ビットが町名です。</p></article>
+    <article class="card"><div class="icon">📮</div><h3>ルーター</h3><p>町と町を結ぶ郵便局。接続口ごとに、その町に属する別々のIPを持ちます。</p></article>
+  </div>
+  <div class="diagram" role="img" aria-label="ネットワーク構成図">町 A: 192.168.1.0/24                 町 B: 192.168.2.0/24
+
+ PC-A ─── Switch ─── [ Router ] ─── Switch ─── PC-B
+ .10                 .1       .1                 .20
+                  192.168.1  192.168.2</div>
+</section>
+
+<section id="subnet"><span class="tag">02 / SUBNET</span><h2>「同じ町」の範囲を計算する</h2>
+  <div class="grid"><div class="card analogy"><h3>たとえば 192.168.1.42/24</h3><p><code>/24</code>では <strong>192.168.1</strong> が町名、<strong>42</strong> が家番号です。</p><div class="range"><div class="nw">.0<br>町の名前</div><div class="hosts">.1 ～ .254<br>家に使える</div><div class="bc">.255<br>全員宛て</div></div></div>
+  <div class="card warning"><h3>両端は使えない</h3><p>最初はネットワークアドレス、最後はブロードキャストアドレスです。通常、PCやルーターには設定しません。</p><p><strong>使える数 = 全アドレス数 − 2</strong></p></div></div>
+  <h3 style="margin-top:32px">最重要の早見表</h3>
+  <table><thead><tr><th>CIDR</th><th>マスク</th><th>区画サイズ</th><th>通常使える数</th></tr></thead><tbody>
+    <tr><td>/24</td><td>255.255.255.0</td><td>256</td><td>254</td></tr><tr><td>/25</td><td>255.255.255.128</td><td>128</td><td>126</td></tr><tr><td>/26</td><td>255.255.255.192</td><td>64</td><td>62</td></tr><tr><td>/27</td><td>255.255.255.224</td><td>32</td><td>30</td></tr><tr><td>/28</td><td>255.255.255.240</td><td>16</td><td>14</td></tr><tr><td>/29</td><td>255.255.255.248</td><td>8</td><td>6</td></tr><tr><td>/30</td><td>255.255.255.252</td><td>4</td><td>2</td></tr>
+  </tbody></table>
+  <div class="card rule" style="margin-top:24px"><h3>/26 の例：10.20.30.77</h3><p><code>256 − 192 = 64</code>。区切りは 0, 64, 128, 192。77は64〜127に入ります。</p><p><strong>NW:</strong> 10.20.30.64　 <strong>Hosts:</strong> .65〜.126　 <strong>BC:</strong> .127</p></div>
+</section>
+
+<section id="devices"><span class="tag">03 / DEVICES</span><h2>直接接続・Switch・特別な住所</h2><p class="intro">Switchが増えても町は分かれません。町を分ける境界になるのはRouterです。</p>
+  <div class="grid three">
+    <article class="card"><div class="icon">🔌</div><h3>直接接続</h3><p>2台を同じネットワークにします。2台だけで話すならGatewayは不要です。</p><p><code>A .10/24 ── B .20/24</code></p></article>
+    <article class="card"><div class="icon">🔀</div><h3>Switch</h3><p>同じネットワークに参加できる台数を増やします。Switchを挟んでもIPの計算方法は変わりません。</p></article>
+    <article class="card warning"><div class="icon">🔁</div><h3>Loopback</h3><p><code>127.0.0.1</code>は自分自身を指す特別な住所です。別のHostへの通信には使えません。</p></article>
+  </div>
+  <div class="diagram" style="margin-top:18px">直接接続                       Switch経由
+A ───────── B                   A ─┐
+                                 ├─ Switch ─ C
+                                B ─┘
+
+どちらも同じルール：同じNetwork部、重複しないHost部</div>
+</section>
+
+<section id="router"><span class="tag">04 / ROUTER</span><h2>同じ町なら直接、違う町ならルーター</h2>
+  <div class="diagram">送信先 192.168.1.20（自分と同じ /24）
+PC ───────────────────────────→ 相手へ直接
+
+送信先 192.168.2.20（自分とは別の /24）
+PC ───→ Default Gateway ───→ 別の町へ</div>
+  <div class="grid" style="margin-top:18px"><div class="card rule"><h3>正しいゲートウェイ</h3><p>PC <code>192.168.1.10/24</code><br>GW <code>192.168.1.1</code></p><p>同じ町なので、まずルーターまで届きます。</p></div><div class="card warning"><h3>届かないゲートウェイ</h3><p>PC <code>192.168.1.10/24</code><br>GW <code>10.0.0.1</code></p><p>最初の郵便局が別の町なので、そこへ渡せません。</p></div></div>
+</section>
+
+<section id="routes"><span class="tag">05 / ROUTING TABLE</span><h2>ルーティング表は道案内</h2><p class="intro">「この町へ行く荷物は、隣の誰に渡すか」を書きます。Next hopは、直接届く隣のルーターです。</p>
+  <div class="diagram">192.168.10.0/24       10.0.0.0/30       192.168.20.0/24
+
+ PC-A ─── R1 (.1) ───────── (.2) R2 ─── PC-B
+              │                         │
+              └─ 192.168.20.0/24        └─ 192.168.10.0/24
+                 → 10.0.0.2                → 10.0.0.1
+
+        行きの道だけでなく、帰りの道も必要！</div>
+  <div class="grid" style="margin-top:18px"><div class="card"><h3>デフォルトルート</h3><p><code>0.0.0.0/0 → 次のルーター</code></p><p>ほかの案内に一致しない荷物を、まとめて同じ方向へ送ります。</p></div><div class="card warning"><h3>NetPracticeでの順番</h3><p>ルートは上から調べ、最初に一致したものを使います。<code>default</code>は何にでも一致するため、複数行ある場合は最後に置きます。</p><p><small>実際の一般的なIPルーティングでは、通常は最も具体的な経路（長いPrefix）が優先されます。</small></p></div></div>
+</section>
+
+<section id="levels"><span class="tag">06 / LEVEL 4 &amp; 5</span><h2>Level 4からLevel 5へ</h2><p class="intro">Level 4は「住所の範囲を重ねない」、Level 5は「別の町への行き方と帰り方を教える」問題です。</p>
+  <div class="card" style="margin-bottom:18px"><h3>Level 4：Routerの別ポートと重ねない</h3>
+    <div class="diagram">.0 ─────── .127 | .128 ─────── .191 | .192 ─────── .255
+     R2: /25          Switch側の空き /26         R3: /26
+
+Switch側の設定例
+A1  82.180.118.132/26
+B1  82.180.118.190/26
+R1  82.180.118.129/26
+
+Network .128 / Hosts .129～.190 / Broadcast .191</div>
+    <p><strong>A1・B1・R1</strong>は同じSwitch上なので同じサブネットにします。ただし、RouterのR2・R3が使う範囲とは重ねません。</p>
+  </div>
+  <div class="card"><h3>Level 5：Routeで往復させる</h3>
+    <div class="diagram">A ─── R1 ｜ Router ｜ R2 ─── B
+
+AのRoute                         BのRoute
+default → R1のIP                 default → R2のIP
+
+往路：A → R1 → Router → R2 → B
+復路：B → R2 → Router → R1 → A</div>
+    <p><code>Destination</code>は「どのネットワークへ」、<code>Gateway</code>は「最初に誰へ渡すか」です。Gatewayには必ず、自分と直接つながり、同じサブネットにいるRouterのIPを指定します。</p>
+  </div>
+</section>
+
+<section id="solve"><span class="tag">07 / PLAYBOOK</span><h2>問題を解く順番</h2><div class="steps">
+  <div class="step"><strong>ネットワークを色分け</strong><br>ルーターの接続口を境界に、各LANとルーター間リンクを別の町として分ける。</div>
+  <div class="step"><strong>各町の範囲を計算</strong><br>ネットワーク、最初のホスト、最後のホスト、ブロードキャストを書く。</div>
+  <div class="step"><strong>同一区間の住所をそろえる</strong><br>同じケーブル周辺は同じサブネット。重複と両端の禁止アドレスを避ける。</div>
+  <div class="step"><strong>PCの出口を設定</strong><br>デフォルトゲートウェイには、同じLANにいるルーターのIPを指定する。</div>
+  <div class="step"><strong>未知の町へのルートを追加</strong><br>宛先はネットワークアドレス、Next hopは直接つながる隣のルーター。</div>
+  <div class="step"><strong>指で往復を追跡</strong><br>送信元→宛先だけでなく、宛先→送信元の返事も一歩ずつ確認する。</div>
+  </div>
+  <div class="card check" style="margin-top:24px"><h3>最終チェック</h3>
+    <label><input type="checkbox"> 同じLANは同じサブネット</label><label><input type="checkbox"> IPは重複していない</label><label><input type="checkbox"> NW/BCアドレスを機器に使っていない</label><label><input type="checkbox"> GatewayはPCと同じサブネット</label><label><input type="checkbox"> Next hopは直接届く隣のIP</label><label><input type="checkbox"> 行きと帰りの両方にルートがある</label>
+  </div>
+</section>
+
+<section id="tool"><span class="tag">08 / PRACTICE TOOL</span><h2>サブネット計算機</h2><p class="intro">例として <code>10.20.30.77/26</code> を入力してみてください。</p>
+  <div class="card"><label for="cidr">IPv4アドレス / CIDR</label><input id="cidr" value="10.20.30.77/26" inputmode="decimal"><button id="calc">範囲を計算する</button><div id="result" aria-live="polite"></div></div>
+  <div class="card quiz" style="margin-top:18px"><h3>1問だけ挑戦</h3><p><code>192.168.5.70/27</code> のネットワークアドレスは？</p><button onclick="showAnswer()">答えを見る</button><div class="answer" id="answer"><strong>192.168.5.64</strong><br>/27の区画は32。区切りは 0, 32, 64, 96…なので、70は64〜95に入ります。BCは.95、ホストは.65〜.94です。</div></div>
+</section>
+</main>
+<footer>同じ町なら直接。違う町ならルーター。最後に帰り道。</footer>
+<script>
+  function ipToInt(parts){return parts.reduce((n,x)=>((n<<8)>>>0)+x,0)>>>0}
+  function intToIp(n){return [n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.')}
+  function calculate(){
+    const raw=document.querySelector('#cidr').value.trim(); const out=document.querySelector('#result');
+    const m=raw.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/(\d|[12]\d|3[0-2])$/);
+    if(!m){out.innerHTML='<span style="color:#d95757">例の形で入力してください：192.168.1.42/24</span>';return}
+    const oct=m.slice(1,5).map(Number), prefix=Number(m[5]);
+    if(oct.some(x=>x>255)){out.innerHTML='<span style="color:#d95757">各数字は0〜255にしてください。</span>';return}
+    const ip=ipToInt(oct), mask=prefix===0?0:(0xffffffff << (32-prefix))>>>0;
+    const network=(ip&mask)>>>0, broadcast=(network|(~mask>>>0))>>>0;
+    const first=prefix>=31?network:(network+1)>>>0, last=prefix>=31?broadcast:(broadcast-1)>>>0;
+    const usable=prefix===32?1:prefix===31?2:Math.max(0,Math.pow(2,32-prefix)-2);
+    out.innerHTML=`<div class="result-grid"><div><small>ネットワーク</small><strong>${intToIp(network)}/${prefix}</strong></div><div><small>ブロードキャスト</small><strong>${intToIp(broadcast)}</strong></div><div><small>ホスト範囲</small><strong>${intToIp(first)} ～ ${intToIp(last)}</strong></div><div><small>通常使える数</small><strong>${usable.toLocaleString()}台</strong></div></div>`;
+  }
+  function showAnswer(){document.querySelector('#answer').classList.add('show')}
+  document.querySelector('#calc').addEventListener('click',calculate);
+  document.querySelector('#cidr').addEventListener('keydown',e=>{if(e.key==='Enter')calculate()}); calculate();
+</script>
+</body>
+</html>
