@@ -1,236 +1,126 @@
+*This project has been created as part of the 42 curriculum by tshimizu.*
+
 # NetPractice
 
-## 基本用語：interface
+## Description
 
-interface（インターフェース）とは、PCやルーターがネットワークに接続するための出入口。
-LANポートやWi-Fiアダプターなどが該当し、各interfaceにはIPアドレスとサブネットマスクを設定する。
+NetPractice is a practical introduction to IPv4 networking. The project consists of ten browser-based exercises in which an incomplete network must be configured so that every communication objective succeeds.
 
-直接つながっているinterface同士では、次の条件が基本となる。
+The exercises cover:
 
-- IPアドレスは別々にする（同じIPを使うと重複する）
-- 相手のIPが自分のサブネット内に入るようにする
-- ネットワークアドレスとブロードキャストアドレスは端末に使わない
+- TCP/IP and IPv4 addressing
+- CIDR notation and subnet masks
+- Network, host, and broadcast addresses
+- Default gateways and routing tables
+- Communication through switches and routers
+- The role of the network layer in the OSI model
+- Forward and return paths between hosts and the Internet
 
-イメージとしては、**「住所（IP）は別々、所属する地域（サブネット）は同じ」**。
+There is no program to compile. The result of each level is exported as a JSON configuration file.
 
-## Level 1：同じネットワークにする
+## Instructions
 
-直接つながった2つのinterfaceを通信可能にする。
+### Run the training interface
 
-```text
-Host A                         Host B
-192.168.1.1/24 ------------- 192.168.1.2/24
+From the repository root, run:
+
+```sh
+cd net_practice
+./run.sh
 ```
 
-`/24`（`255.255.255.0`）では、先頭の3オクテットがネットワーク部分になる。
+The script starts a local web server and normally opens the training interface in a browser. If it does not open automatically, start the server manually from the `net_practice` directory:
 
-```text
-192.168.1 | .1
-192.168.1 | .2
------------  --
-ネットワーク  ホスト
+```sh
+python3 -m http.server 49242
 ```
 
-この例では両方とも `192.168.1.0/24` に所属するため、直接通信できる。
+Then visit [http://localhost:49242](http://localhost:49242). The port may be changed if `49242` is already in use.
 
-`192.168.1.0/24` のアドレスは次のように使われる。
+### Complete and export a level
 
-```text
-192.168.1.0     ネットワークアドレス（使用不可）
-192.168.1.1     使用可能
-      ...
-192.168.1.254   使用可能
-192.168.1.255   ブロードキャストアドレス（使用不可）
-```
+1. Open the **Training** tab and enter the correct 42 login.
+2. Change the unshaded fields in the network diagram.
+3. Select **Check again** and use the logs to diagnose invalid addresses, missing gateways, or routing errors.
+4. When every objective reports `OK`, select **Get my config** before moving to the next level.
+5. Repeat the process for all ten levels.
 
-## Level 2：マスクから通信範囲を判断する
+The same login should be used throughout the training because it determines the generated configurations.
 
-IPの見た目だけでなく、サブネットマスクを使って同じサブネットか判断する。
+### Submission
 
-例えば `/25`（`255.255.255.128`）では、`192.168.1.x` が2つのサブネットに分かれる。
+Place the ten exported configuration files at the repository root, one file per level:
 
 ```text
-192.168.1.0/25     192.168.1.0   ～ 192.168.1.127
-192.168.1.128/25   192.168.1.128 ～ 192.168.1.255
+level1.json
+level2.json
+level3.json
+level4.json
+level5.json
+level6.json
+level7.json
+level8.json
+level9.json
+level10.json
 ```
 
-したがって、次の2つは同じ前半のサブネットに所属する。
+Only files present in the Git repository are evaluated. Check the filenames, commit all ten files, and push them before submission.
+
+During the defense, three random levels must be completed within the time limit. External tools are prohibited during the evaluation; only a simple calculator such as `bc` is tolerated.
+
+## Networking notes
+
+### IPv4 addresses and subnet masks
+
+An IPv4 address identifies an interface. A subnet mask divides that address into a network part and a host part. Two directly connected interfaces can communicate when each considers the other to be on its local subnet and their addresses are unique.
+
+The network address and broadcast address cannot normally be assigned to hosts. For example, `192.168.1.64/26` has the following range:
 
 ```text
-192.168.1.1/25 ------------- 192.168.1.100/25   OK
+Network address:    192.168.1.64
+Usable hosts:       192.168.1.65 - 192.168.1.126
+Broadcast address:  192.168.1.127
 ```
 
-一方、`.1` は前半、`.200` は後半なので同じサブネットではない。
+Common masks used in the exercises are:
 
-```text
-192.168.1.1/25 ------------- 192.168.1.200/25   NG
-```
+| CIDR | Subnet mask | Addresses | Usable host addresses |
+| ---: | --- | ---: | ---: |
+| `/24` | `255.255.255.0` | 256 | 254 |
+| `/25` | `255.255.255.128` | 128 | 126 |
+| `/26` | `255.255.255.192` | 64 | 62 |
+| `/27` | `255.255.255.224` | 32 | 30 |
+| `/28` | `255.255.255.240` | 16 | 14 |
+| `/29` | `255.255.255.248` | 8 | 6 |
+| `/30` | `255.255.255.252` | 4 | 2 |
 
-### マスクは必ず同じでなければならない？
+### Switches, routers, and gateways
 
-必ず同じである必要はない。重要なのは、**両方のinterfaceが相手を自分のサブネット内だと判断できること**。
+A switch connects interfaces within the same local network. It does not route traffic between different IP networks.
 
-```text
-A: 192.168.1.1/24
-B: 192.168.1.2/25
-```
+A router connects different networks. Each router interface belongs to the subnet attached to it. When a destination is outside a host's local subnet, the host sends the packet to a directly reachable default gateway. Routers then use their routing tables to select the next hop.
 
-- Aの `/24` の範囲にはBの `.2` が入る
-- Bの `/25` の範囲にはAの `.1` が入る
+A valid route needs both a destination network and a reachable next-hop address. Communication also requires a return path; a correct forward route alone is insufficient.
 
-この組み合わせでは直接通信できる。ただし、実際のネットワーク設計では混乱や通信障害を避けるため、同じサブネット内では同じマスクを使うのが基本。
+The default route is written as `0.0.0.0/0` and is used when no more specific route matches the destination.
 
-判断するときは、常に次の両方を確認する。
+### OSI model
 
-```text
-Aのサブネット範囲にBのIPが入る
-かつ
-Bのサブネット範囲にAのIPが入る
-```
+NetPractice mainly concerns OSI Layer 3, the network layer, where IPv4 addressing and routing operate. Switches primarily forward frames at Layer 2, while routers forward packets between Layer 3 networks. Thinking about these roles helps separate local-link problems from routing problems.
 
-## Level 3：スイッチで複数端末をつなぐ
+## Troubleshooting checklist
 
-スイッチにつながった複数の端末を、同じサブネットに所属させる。
+- Verify that directly connected interfaces are in compatible subnets.
+- Check for duplicate IP addresses.
+- Do not assign a network or broadcast address to a host.
+- Ensure that every gateway is reachable from the interface using it.
+- Confirm that a route matches the intended destination.
+- Check the return route as well as the forward route.
+- Avoid masks so broad that a remote destination is mistaken for a local one.
+- Read the interface logs after selecting **Check again**.
 
-```text
-Host A ---+
-          |
-Host B ---+--- Switch
-          |
-Host C ---+
-```
+## Resources
+- https://note.com/syamashi/n/n57fc506e0c5c
 
-例えば次の設定なら、全端末が `192.168.1.0/24` に所属するので通信できる。
 
-```text
-Host A: 192.168.1.1/24
-Host B: 192.168.1.2/24
-Host C: 192.168.1.3/24
-```
-
-スイッチについて覚えること：
-
-- 各端末のIPは重複させない
-- つながった端末を同じサブネットに入れる
-- この問題では、スイッチ自体にIPを設定する必要はない
-- スイッチだけでは異なるネットワーク間を中継できない
-- 異なるネットワーク間の通信にはルーターが必要
-
-## ここまでの確認手順
-
-1. 直接つながっているinterfaceを確認する
-2. 各interfaceのIPが重複していないか確認する
-3. マスクから各interfaceのサブネット範囲を求める
-4. お互いのIPが相手側のサブネット範囲に入るか確認する
-5. ネットワークアドレスやブロードキャストアドレスを使っていないか確認する
-
-## CIDR表記からサブネットマスクへの変換
-
-`/30` のような表記は、**32ビットのうち、左から何個を `1` にするか**を表す。
-
-サブネットマスクは32ビットで、8ビットずつ4つに分かれている。
-
-```text
-8ビット   8ビット   8ビット   8ビット
---------  --------  --------  --------
-```
-
-### `/30` の変換
-
-`/30` は左から30個が `1`、残り2個が `0`。
-
-```text
-11111111.11111111.11111111.11111100
-```
-
-各8ビットを10進数へ変換する。
-
-```text
-11111111 = 255
-11111111 = 255
-11111111 = 255
-11111100 = 252
-```
-
-したがって、次のようになる。
-
-```text
-/30 = 255.255.255.252
-```
-
-2進数の各桁には、次の値が割り当てられている。
-
-```text
-ビット：  1   1   1   1   1   1   0   0
-値：    128  64  32  16   8   4   2   1
-```
-
-`1` の場所だけを足す。
-
-```text
-128 + 64 + 32 + 16 + 8 + 4 = 252
-```
-
-### `/26` の変換例
-
-`/26` は左から26個を `1` にする。
-
-```text
-11111111.11111111.11111111.11000000
-```
-
-最後の8ビットでは、`128` と `64` の場所が `1` になっている。
-
-```text
-128 + 64 = 192
-/26 = 255.255.255.192
-```
-
-### よく使う対応表
-
-```text
-/24 = 255.255.255.0
-/25 = 255.255.255.128
-/26 = 255.255.255.192
-/27 = 255.255.255.224
-/28 = 255.255.255.240
-/29 = 255.255.255.248
-/30 = 255.255.255.252
-```
-
-変化する最後の数字は、`128` から順番に値を足したもの。
-
-```text
-/25 -> 128
-/26 -> 128 + 64            = 192
-/27 -> 128 + 64 + 32       = 224
-/28 -> 128 + 64 + 32 + 16  = 240
-/29 -> 上記 + 8            = 248
-/30 -> 上記 + 4            = 252
-```
-
-覚え方：**`/数字`は、左からその個数だけビットを `1` にする指定**。
-
-### `/30` のアドレス範囲
-
-`/30` では、アドレスが4個ずつのグループに分かれる。
-
-```text
-0～3
-4～7
-8～11
-12～15
-...
-252～255
-```
-
-各グループの最初はネットワークアドレス、最後はブロードキャストアドレスなので、端末に使えるのは中央の2個だけ。
-
-```text
-192.168.1.8/30   ネットワークアドレス
-192.168.1.9/30   使用可能
-192.168.1.10/30  使用可能
-192.168.1.11/30  ブロードキャストアドレス
-```
-
-覚え方：**`/30` は4個ずつ区切り、中央の2個だけ使用可能**。
+AI was used to review the subject requirements, organize the README, and improve the explanations of subnetting, gateways, routing, switches, routers, and OSI layers. The exported level configurations were completed separately and were not generated by AI.
